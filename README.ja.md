@@ -34,9 +34,9 @@ SidecarSwitch は **iPad を Mac のメイン画面やサブ画面として使�
 
 初期設定済みの実機で撮影した開発版のデモです。バージョンや機器の組み合わせごとに検証が必要です。起動の待ち時間は8倍速、最後の画面は1秒長く表示しています。[高画質の MP4 を見る](docs/videos/headless-boot-demo.mp4)。
 
-**[macOS 版をダウンロード（DMG）](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.3/SidecarSwitch-0.1.0-dev.3-macos-arm64.dmg)**
+**[macOS 版をダウンロード（DMG）](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.5/SidecarSwitch-0.1.0-dev.5-macos-arm64.dmg)**
 
-v0.1.0-dev.3 · Apple Silicon · macOS 14+ · [リリースノート](https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.3)
+v0.1.0-dev.5 · Apple Silicon · macOS 14+ · [リリースノート](https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.5)
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-0.1.0-blue.svg" alt="Version: 0.1.0">
@@ -57,7 +57,7 @@ v0.1.0-dev.3 · Apple Silicon · macOS 14+ · [リリースノート](https://gi
 
 複数の Mac で使う場合は、各 Mac で SidecarSwitch のペアリングとグローバルショートカットの設定を済ませてください。
 
-Apple Silicon・macOS 14 以降に対応する v0.1.0-dev.3 のインストーラーを公開しました。上の DMG から導入できます。[ソース版の導入手順](docs/INSTALLATION.ja.md#source-installation)で自分でビルドすることもできます。
+Apple Silicon・macOS 14 以降に対応する v0.1.0-dev.5 のインストーラーを公開しました。上の DMG から導入できます。[ソース版の導入手順](docs/INSTALLATION.ja.md#source-installation)で自分でビルドすることもできます。
 
 ## 画面を見ながら始めよう
 
@@ -65,7 +65,7 @@ Apple Silicon・macOS 14 以降に対応する v0.1.0-dev.3 のインストー�
 
 ### 1. インストールして開く
 
-[v0.1.0-dev.3 DMG](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.3/SidecarSwitch-0.1.0-dev.3-macos-arm64.dmg) をダウンロードし、**SidecarSwitch.app を Applications にドラッグ**して開きます。Python は同梱済みで、Homebrew やコンパイラーは不要です。
+[v0.1.0-dev.5 DMG](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.5/SidecarSwitch-0.1.0-dev.5-macos-arm64.dmg) をダウンロードし、**SidecarSwitch.app を Applications にドラッグ**して開きます。Python は同梱済みで、Homebrew やコンパイラーは不要です。
 
 起動すると設定画面が開きます。画面を閉じてもメニューバーは残ります。もう一度開くには、メニューの **「設定とペアリング」**を選ぶか、App をダブルクリックします。
 
@@ -94,6 +94,8 @@ Apple Silicon・macOS 14 以降に対応する v0.1.0-dev.3 のインストー�
 
 デスクトップが表示されるのを待ち、**「接続中のディスプレイ」**で役割を確認します。**「Sidecar を検出」は機器が見つかった状態で、画面表示の完了を意味しません。**
 
+iPad を切断する前に、利用可能な代替画面が残ることを確認します。確認できなければ iPad の接続を維持します。切断前にあった物理モニターがすべて検出できなくなり、復旧にも失敗した場合は、同じ iPad への再接続を 1 回だけ試み、エラーを残して自動再試行を停止します。
+
 画面の判定が違う場合は、そのカードの **「物理ディスプレイ判定から除外」**をオン／オフにできます。物理モニターの有無の判定だけに影響し、画面の制御や表示は停止しません。`Generic`／`Generic Display` は既定で除外されますが、実物のモニターならチェックを外せます。「自動判定に戻す」で既定に戻せます。**すべての物理モニターを除外すると、自動モードはモニターがないものとして iPad への接続を試みる場合があります。** [詳しい説明](docs/TROUBLESHOOTING.ja.md#generic-display)
 
 ### 4. 手動か自動かを選ぶ
@@ -104,7 +106,7 @@ Apple Silicon・macOS 14 以降に対応する v0.1.0-dev.3 のインストー�
 
 | モード | 動作 |
 | --- | --- |
-| **手動モード**（新規インストール時の既定） | ボタンやショートカットで接続します。切断後の自動再接続はしません。 |
+| **手動モード**（新規インストール時の既定） | 通常はボタンやショートカットで操作します。モニターの抜き差しだけではメイン画面を自動変更しません。 |
 | **自動モード** | 物理モニターがあれば優先し、なければ iPad への切り替えを試みます。接続済み iPad はサブ画面として残せます。 |
 | **iPad 優先モード** | 物理モニターがあっても、iPad をメイン画面にすることを優先します。 |
 
@@ -125,7 +127,9 @@ Apple Silicon・macOS 14 以降に対応する v0.1.0-dev.3 のインストー�
 
 [![仮想ディスプレイ：BetterDisplay の仮想画面を選んで代替に指定](docs/images/quick-start/ja-virtual.png)](docs/images/quick-start/ja-virtual.png)
 
-iPad の準備ができていない間もデスクトップを維持し、切り替え後も残ります。リモート復旧が必要なら、Screen Sharing／VNC または SSH を事前に設定してください。SidecarSwitch がリモートアクセスを有効にすることはありません。
+物理モニターがない場合は仮想画面でデスクトップを維持し、iPad への切り替え後も接続を保持します。物理モニターへ引き継ぐ際は、アクティブなメイン画面になったことを確認してから、設定済みの仮想画面を切断します。この切り替えで iPad の切断も要求した場合は、仮想画面の切断を確認してから Sidecar を切断します。手動モードでは、モニターを挿しただけでこの切り替えを開始しません。
+
+リモート復旧が必要なら、Screen Sharing／VNC または SSH を事前に設定してください。SidecarSwitch がリモートアクセスを有効にすることはありません。
 
 ## 困ったら、まずここを確認
 

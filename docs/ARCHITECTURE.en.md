@@ -41,9 +41,15 @@ USB detection, display events, and the 30-second watchdog may arrive together. A
 - Physical display loss starts a four-second debounce. If the monitor returns before expiry, the transfer is canceled. This avoids unnecessary iPad wakeups during brief signal changes, not all display failures.
 - Sidecar connection attempts are limited to three, with three seconds between retries. Exhaustion sends one notification and keeps the fallback available. Expiry of the 30-second cooldown does not restart retries: the target iPad must change from absent to present in USB/Sidecar discovery, or the user must reconnect/reset manually. Query errors, generic USB wakeups, and physical monitor changes do not release the pause.
 
-### 4. Virtual fallback
+### 4. Virtual fallback and safe handoff
 
-Without a physical monitor, the configured BetterDisplay virtual screen, normally `SidecarSwitchVirtual`, provides desktop fallback and remains connected after iPad takeover. Configure Screen Sharing/VNC or SSH yourself before relying on recovery. SidecarSwitch does not enable remote access; SSH does not itself depend on a virtual display.
+- Without a physical monitor, the configured BetterDisplay virtual screen, normally `SidecarSwitchVirtual`, provides desktop fallback and remains connected after iPad takeover. A successful Sidecar connection alone does not retire it.
+- The detector keeps online physical displays with normal dimensions and hardware or BetterDisplay identity, even when temporarily inactive or lacking a readable mirror source. `is_active` and `mirror_source_id` separately describe readiness; zero- or one-pixel placeholders remain excluded.
+- The shared physical handoff preserves the existing physical main display where possible and pins its UUID, or its name when no UUID is available. After removing mirror dependencies involving virtual or Sidecar displays, it observes the same physical display again and verifies that it is active, main, and independent before disconnecting the configured virtual fallback. An iPad disconnect request also verifies that the virtual fallback is off before issuing the Sidecar disconnect command, then rechecks the original physical target afterward.
+- If the fallback cannot be verified before disconnection, the iPad stays connected. If all physical displays disappear afterward and bounded recovery fails, one reconnection to the original iPad is attempted only when queries are valid and the target is unchanged. Even if reconnection succeeds, the disconnect error remains and background retries stop until an explicit user action, mode change, or reset. Restoring the connection is not reported as a successful disconnect.
+- Manual only mode returns `NO_CHANGE` without an explicit request, so monitor hotplug alone does not trigger a handoff. Separately enabled boot connections follow the rules below. Cancellation prevents subsequent fallback retirement, disconnection, or recovery reconnection.
+
+Configure Screen Sharing/VNC or SSH yourself before relying on recovery. SidecarSwitch does not enable remote access; SSH does not itself depend on a virtual display.
 
 ### 5. Atomic snapshots
 

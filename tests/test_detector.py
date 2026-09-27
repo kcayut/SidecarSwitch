@@ -71,6 +71,7 @@ class TestSidecarSwitchDetector(unittest.TestCase):
         mock_cg = MagicMock()
         mock_cg.CGGetOnlineDisplayList.side_effect = mock_get_online_displays
         mock_cg.CGDisplayIsActive.return_value = 1
+        mock_cg.CGDisplayMirrorsDisplay.return_value = 0
         mock_cg.CGDisplayIsMain.return_value = 1
         mock_cg.CGDisplayIsBuiltin.return_value = 0
         mock_cg.CGDisplayPixelsWide.return_value = 1920
@@ -87,7 +88,7 @@ class TestSidecarSwitchDetector(unittest.TestCase):
         self.assertEqual(displays[0].name, "SidecarSwitchVirtual")
 
     def test_ghost_headless_display_ignored(self) -> None:
-        """Verify that 0x0, inactive, or vendor 0 headless placeholder displays are filtered out."""
+        """Zero-size and unidentified headless placeholders remain excluded."""
         import ctypes
 
         def mock_get_online_displays(max_d, d_ids, count_ref):
@@ -99,6 +100,7 @@ class TestSidecarSwitchDetector(unittest.TestCase):
         mock_cg.CGGetOnlineDisplayList.side_effect = mock_get_online_displays
         # Inactive or 0x0
         mock_cg.CGDisplayIsActive.return_value = 0
+        mock_cg.CGDisplayMirrorsDisplay.return_value = 0
         mock_cg.CGDisplayIsMain.return_value = 1
         mock_cg.CGDisplayIsBuiltin.return_value = 0
         mock_cg.CGDisplayPixelsWide.return_value = 0
@@ -109,8 +111,65 @@ class TestSidecarSwitchDetector(unittest.TestCase):
         self.detector._cg = mock_cg
         self.mock_bd_cli.get_display_identifiers.return_value = []
 
-        displays = self.detector.get_online_displays()
-        self.assertEqual(len(displays), 0)
+        for width, height in ((0, 0), (1, 1), (1920, 1080)):
+            with self.subTest(size=(width, height)):
+                mock_cg.CGDisplayPixelsWide.return_value = width
+                mock_cg.CGDisplayPixelsHigh.return_value = height
+                self.assertEqual(self.detector.get_online_displays(), [])
+
+    def test_online_physical_display_stays_visible_without_admitting_placeholders(self) -> None:
+        import ctypes
+
+        def get_online(max_d, d_ids, count_ref):
+            d_ids[0] = 3
+            ctypes.cast(count_ref, ctypes.POINTER(ctypes.c_uint32))[0] = 1
+            return 0
+
+        cg = MagicMock()
+        cg.CGGetOnlineDisplayList.side_effect = get_online
+        cg.CGDisplayIsMain.return_value = 0
+        cg.CGDisplayIsBuiltin.return_value = 0
+        cg.CGDisplayVendorNumber.return_value = 0x0D2D
+        cg.CGDisplayModelNumber.return_value = 7218
+        self.detector._cg = cg
+        self.mock_bd_cli.get_display_identifiers.return_value = [{"displayID": 3, "name": "CH7218"}]
+
+        for active, source, width, height, expected in (
+            (False, 4, 1920, 1080, True),  # Hardware mirror target.
+            (True, 4, 1920, 1080, True),   # Software mirror target.
+            (True, 0, 1920, 1080, True),   # Independent physical output.
+            (False, 0, 1920, 1080, True),  # Inactive output after restoring a saved layout.
+            (False, 4, 0, 0, False),
+            (False, 4, 1, 1, False),
+        ):
+            with self.subTest(active=active, source=source, size=(width, height)):
+                cg.CGDisplayIsActive.return_value = active
+                cg.CGDisplayMirrorsDisplay.return_value = source
+                cg.CGDisplayPixelsWide.return_value = width
+                cg.CGDisplayPixelsHigh.return_value = height
+                displays = self.detector.get_online_displays()
+                self.assertEqual(len(displays), int(expected))
+                if expected:
+                    self.assertFalse(self.detector.is_display_ignored(displays[0]))
+                    self.assertEqual(displays[0].is_active, active)
+                    self.assertEqual(displays[0].mirror_source_id, source or None)
+
+        cg.CGDisplayIsActive.return_value = False
+        cg.CGDisplayMirrorsDisplay.return_value = 0
+        cg.CGDisplayPixelsWide.return_value = 1920
+        cg.CGDisplayPixelsHigh.return_value = 1080
+        # Hardware identity alone, or a BetterDisplay identifier alone, keeps an online output.
+        self.mock_bd_cli.get_display_identifiers.return_value = []
+        self.assertEqual(len(self.detector.get_online_displays()), 1)
+        cg.CGDisplayVendorNumber.return_value = cg.CGDisplayModelNumber.return_value = 0
+        self.mock_bd_cli.get_display_identifiers.return_value = [{"displayID": 3, "name": "CH7218"}]
+        self.assertEqual(len(self.detector.get_online_displays()), 1)
+        # Do not turn an inactive virtual/Sidecar session into a ready display.
+        for vendor, model in ((2198, 7218), (0x6161706C, 7218), (0x0D2D, 0x69506164)):
+            with self.subTest(vendor=vendor, model=model):
+                cg.CGDisplayVendorNumber.return_value = vendor
+                cg.CGDisplayModelNumber.return_value = model
+                self.assertEqual(self.detector.get_online_displays(), [])
 
 
 if __name__ == "__main__":

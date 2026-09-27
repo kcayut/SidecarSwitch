@@ -142,9 +142,8 @@ class SidecarSwitchDaemon:
                 self.engine.evaluate(trigger=action.removeprefix('set_') + '_change')
         elif action == 'set_mode':
             if hasattr(self, 'engine') and self.engine is not None:
-                self.engine.runtime.mode = self.engine.config.mode
-                self.engine.runtime.user_override = None
-                self.engine.evaluate(trigger='mode_change')
+                # Pending Manual Only is adopted by the engine's cancellation boundary.
+                self.engine.set_mode(self.engine.config.mode)
         elif action == 'set_autostart':
             if hasattr(self, 'engine') and self.engine is not None:
                 self.engine.evaluate(trigger='autostart_change')

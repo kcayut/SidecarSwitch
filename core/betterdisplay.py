@@ -242,6 +242,17 @@ class BetterDisplayCLI:
         logger.warning(f"set_main_display failed (code {code}): {err or out}")
         return False
 
+    def stop_mirroring(self, specifier: str) -> bool:
+        """Detach a mirrored fallback before making it an independent main display."""
+        if not self.is_available():
+            return False
+        is_uuid = re.fullmatch(r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}", specifier)
+        selector = f"-uuid={specifier}" if is_uuid else f"-name={specifier}"
+        code, out, err = self.run_cmd(["set", selector, "-mirror=off"], timeout=8.0)
+        if code != 0:
+            logger.warning("Could not stop display mirroring: %s", err or out)
+        return code == 0
+
     def connect_virtual_display(self, name: str) -> bool:
         """Connect an existing virtual display."""
         if not self.is_available():
@@ -261,7 +272,7 @@ class BetterDisplayCLI:
             logger.error("Cannot disconnect virtual display: BetterDisplay CLI not available")
             return False
         logger.info(f"Disconnecting Virtual Screen: {name}")
-        code, out, err = self.run_cmd(["set", f"-namelike={name}", "-connected=off"], timeout=8.0)
+        code, out, err = self.run_cmd(["set", f"-name={name}", "-connected=off"], timeout=8.0)
         if code == 0:
             logger.info(f"Virtual Screen '{name}' disconnected successfully")
             return True

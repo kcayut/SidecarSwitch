@@ -398,17 +398,41 @@ private func mutations(_ controller: SettingsWindowController) -> [CheckObject] 
     let declineStart = mutations(controller).count
     cancel.performClick(nil); await settle()
     try require(mutations(controller).count == declineStart, "Clicking native No mutated configuration")
+    func confirmationKeyboardState(_ sheet: NSWindow) -> String {
+        let responder = sheet.firstResponder.map { String(describing: type(of: $0)) } ?? "nil"
+        return "active=\(NSApp.isActive), attached=\(window.attachedSheet?.windowNumber.description ?? "nil"), "
+            + "sheet=\(sheet.windowNumber), keyWindow=\(NSApp.keyWindow?.windowNumber.description ?? "nil"), "
+            + "sheetKey=\(sheet.isKeyWindow), firstResponder=\(responder), defaultButton=\(sheet.defaultButtonCell?.title ?? "nil")"
+    }
+    func waitForConfirmation(_ condition: () -> Bool) async {
+        let deadline = ProcessInfo.processInfo.systemUptime + 1
+        while !condition() && ProcessInfo.processInfo.systemUptime < deadline {
+            try? await Task.sleep(nanoseconds: 10_000_000)
+            NSApp.updateWindows()
+        }
+    }
     for (character, code) in [("\u{1b}", UInt16(53)), ("\r", UInt16(36))] {
-        controller.checkProfileAction("delete", key: profileKey); await settle()
+        controller.checkProfileAction("delete", key: profileKey)
+        await waitForConfirmation { window.attachedSheet != nil }
         guard let keyboardSheet = window.attachedSheet,
               let key = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
                                         windowNumber: keyboardSheet.windowNumber, context: nil, characters: character,
                                         charactersIgnoringModifiers: character, isARepeat: false, keyCode: code) else {
             throw NSError(domain: "Missing native keyboard confirmation", code: 13)
         }
-        NSApp.sendEvent(key); await settle()
+        if !NSApp.isActive { NSApp.activate(ignoringOtherApps: true) }
+        if !keyboardSheet.isKeyWindow { keyboardSheet.makeKeyAndOrderFront(nil) }
+        await waitForConfirmation { NSApp.isActive && keyboardSheet.isKeyWindow && keyboardSheet.isVisible }
+        let beforeKey = confirmationKeyboardState(keyboardSheet)
+        try require(NSApp.isActive && keyboardSheet.isKeyWindow && keyboardSheet.isVisible,
+                    "Native confirmation key \(code) was not ready; \(beforeKey)")
+        NSApp.sendEvent(key)
+        await waitForConfirmation { window.attachedSheet == nil || mutations(controller).count != declineStart }
+        let keyboardDiagnostic = "mutationDelta=\(mutations(controller).count - declineStart); "
+            + "before={\(beforeKey)}; after={\(confirmationKeyboardState(keyboardSheet))}"
+        print("Native confirmation key \(code): \(keyboardDiagnostic)")
         try require(window.attachedSheet == nil && mutations(controller).count == declineStart,
-                    "Native confirmation key \(code) did not cancel without mutation")
+                    "Native confirmation key \(code) did not cancel without mutation; \(keyboardDiagnostic)")
     }
     controller.checkConfirm(true)
 

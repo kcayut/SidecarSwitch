@@ -48,6 +48,10 @@ class DisplayExclusionTests(unittest.TestCase):
         self.assertFalse(monitor.is_virtual)
 
         self.cfg.display_exclusions[ONE] = False
+        def retire_virtual(_name):
+            self.bd.check_virtual_display.return_value = (True, False)
+            return True
+        self.bd.disconnect_virtual_display.side_effect = retire_virtual
         engine = StateEngine(self.cfg, self.detector, self.bd)
         with patch.object(self.detector, 'get_online_displays', return_value=[monitor]), \
              patch.object(self.detector, 'parse_usb_devices', return_value=[]), \
@@ -56,7 +60,9 @@ class DisplayExclusionTests(unittest.TestCase):
         self.assertEqual(engine.actual.physical_displays, [monitor])
         self.assertFalse(monitor.excluded_from_physical_detection)
         self.assertEqual(engine.desired.target_display_role, DisplayRole.PHYSICAL)
-        self.bd.set_main_display.assert_not_called()
+        self.bd.set_main_display.assert_called_once_with(ONE.lower())
+        self.bd.disconnect_virtual_display.assert_called_once_with(self.cfg.virtual_display_name)
+        self.assertFalse(engine.actual.virtual_display_connected)
         self.bd.connect_virtual_display.assert_not_called()
         self.bd.connect_sidecar.assert_not_called()
 

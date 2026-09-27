@@ -233,7 +233,12 @@ class RegressionTests(unittest.TestCase):
         def set_main(_):
             physical.main_display = self.physical
             return True
+        def disconnect_virtual(_):
+            self.assertEqual(physical.main_display, self.physical)
+            physical.virtual_display_connected = False
+            return True
         self.bd.set_main_display.side_effect = set_main
+        self.bd.disconnect_virtual_display.side_effect = disconnect_virtual
         with patch("core.state_engine.time.time", return_value=self.engine.runtime.cooldown_until + 1):
             self.engine.evaluate(async_transition=False)
             self.engine.evaluate(async_transition=False)
@@ -241,6 +246,8 @@ class RegressionTests(unittest.TestCase):
         self.assertEqual(self.engine.runtime.retry_count, self.cfg.max_retries)
         self.assertEqual(self.engine.desired.target_display_role, DisplayRole.PHYSICAL)
         self.bd.set_main_display.assert_called_once_with(self.physical.name)
+        self.bd.disconnect_virtual_display.assert_called_once_with(self.cfg.virtual_display_name)
+        self.assertFalse(self.engine.actual.virtual_display_connected)
         self.assertEqual(self.bd.connect_sidecar.call_count, self.cfg.max_retries)
 
     def test_explicit_ipad_control_can_retry_after_pause(self):

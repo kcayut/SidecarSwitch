@@ -45,8 +45,15 @@ Swift / AppKit + SwiftUI SidecarSwitch.app
 - **4 秒瞬斷防抖 (Debounce)**：許多外接螢幕切換訊號源或休眠喚醒時會短暫掉訊 1~2 秒。SidecarSwitch 在偵測到實體螢幕消失時，會啟動 4 秒防抖計時器；若螢幕在倒數結束前恢復，立即取消轉移動作，避免 iPad 被不必要地喚起。
 - **重試上限與 30 秒冷卻 (Cooldown)**：Sidecar 連線最多嘗試 3 次，間隔 3 秒；耗盡後通知一次並保留備援。30 秒冷卻結束也不會自動重開重試；需觀察到目標 iPad 的 USB／Sidecar 可用狀態由無變有，或由使用者手動重連／重設。查詢錯誤、一般 USB 喚醒與實體螢幕插拔不會解除暫停。
 
-### 4. 虛擬螢幕備援 (Headless Virtual Display Fallback)
-- 無實體螢幕時，使用已配置的 BetterDisplay 虛擬顯示器（預設 `SidecarSwitchVirtual`）維持桌面備援；iPad 接管後也保留。Screen Sharing／VNC 或 SSH 必須事先自行設定，SidecarSwitch 不啟用遠端存取；SSH 本身不依賴虛擬顯示器。
+### 4. 虛擬螢幕備援與安全交接 (Virtual Fallback and Safe Handoff)
+
+- 無實體螢幕時，使用已配置的 BetterDisplay 虛擬顯示器（預設 `SidecarSwitchVirtual`）維持桌面備援；iPad 接管後也保留，不因 Sidecar 連線成功就停用虛擬螢幕。
+- 偵測器保留有硬體或 BetterDisplay 識別、尺寸正常的在線實體螢幕，即使它暫時 inactive 或沒有可讀取的鏡像來源。`is_active` 與 `mirror_source_id` 另行表示就緒狀態；0／1 像素佔位螢幕仍會排除。
+- 共用的實體交接流程優先保留既有實體主螢幕，並以 UUID（無 UUID 時用名稱）固定目標。解除涉及虛擬／Sidecar 的鏡像依賴後，重新觀察同一實體螢幕確實 active、main 且可獨立顯示，才停用所設定的虛擬備援。要求中斷 iPad 時，還要確認虛擬備援已離線，才送出 Sidecar 斷線命令；斷線後再次驗證原實體目標。
+- 斷線前無法確認備援可用就保留 iPad。若斷線後所有實體螢幕消失，有限次恢復仍失敗，且查詢有效、iPad 目標未改變，僅嘗試重連原 iPad 一次。即使重連成功，也保留本次斷線失敗的錯誤，停止背景續試，等待使用者明確操作、切換模式或重設；不將回復連線算成斷線成功。
+- 僅手動模式在沒有明確要求時回傳 `NO_CHANGE`，插拔螢幕不會自行交接；另行啟用的開機連線依下節規則執行。使用者取消操作後，不再繼續停用備援、斷線或復原重連。
+
+Screen Sharing／VNC 或 SSH 必須事先自行設定，SidecarSwitch 不啟用遠端存取；SSH 本身不依賴虛擬顯示器。
 
 ### 5. 原子狀態快照 (Atomic Snapshot Architecture)
 - 背景守護行程將觀測到的實際狀態、預期狀態與決策原因寫入暫存檔，並透過 `os.replace` 原子替換至 `~/Library/Application Support/SidecarSwitch/runtime/status.json`。

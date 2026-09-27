@@ -27,6 +27,7 @@ For an app in your personal Applications folder, change the first line to `SIDEC
 - [6. Launch at login](#autostart)
 - [7. Collecting logs](#logs)
 - [8. Preflight, unsafe paths, and failed handshakes](#safe-startup)
+- [9. Changing physical displays and safely disconnecting iPad](#physical-handoff)
 
 <a id="filevault"></a>
 ## 1. FileVault and headless cold boot
@@ -158,3 +159,24 @@ Review and redact personal paths and sensitive information before sharing.
 - Failed release update: even if the replacement CLI cannot run, the installer must confirm that the replacement app and background service have stopped before restoring the old version. If shutdown cannot be confirmed, it preserves the current app and backup and reports `Rollback incomplete`; keep them and the error details rather than repeatedly installing over them.
 
 IPC logs record command names only. Historical logs, diagnostics, and actual error messages may still contain device information. Redact serials, UUIDs, accounts, and personal paths before sharing.
+
+<a id="physical-handoff"></a>
+## 9. Changing physical displays and safely disconnecting iPad
+
+### A new monitor does not take over, or macOS asks about mirroring
+
+**Manual only does not switch displays just because a physical monitor is plugged in.** Choose Automatic if you want a connected physical monitor to take over automatically. macOS may still ask whether to mirror or extend the desktop; SidecarSwitch does not guarantee that system display prompts will disappear.
+
+Connected displays may show an adapter name, such as `CH7218`, instead of the monitor brand. Check the actual connection and card status; a different name does not mean that the physical monitor was not detected.
+
+### How disconnecting iPad through SidecarSwitch protects the display
+
+With a physical monitor present, the handoff follows this order:
+
+1. Verify that the physical monitor is active and main, removing mirroring with virtual displays or iPad when needed.
+2. Disconnect the virtual fallback configured in SidecarSwitch.
+3. Disconnect Sidecar and verify that the physical monitor remains usable.
+
+Without a physical monitor, the virtual fallback stays connected for headless use. If a usable fallback cannot be verified before disconnection, iPad stays connected.
+
+If the original physical monitor disappears completely after disconnection and recovery fails, SidecarSwitch attempts to reconnect **the same iPad once at most**. Even a successful reconnection keeps a warning because the disconnect did not complete safely. Further automatic switching pauses instead of repeatedly disconnecting and reconnecting. Once the display is working, explicitly choose Disconnect iPad or another connection action to retry; Refresh alone does not release this protection. If the display has not recovered, reconnect iPad manually and keep the diagnostics and logs.

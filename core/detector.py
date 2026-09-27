@@ -32,7 +32,10 @@ class DisplayDetector:
 
     def _init_coregraphics(self) -> Optional[ctypes.CDLL]:
         try:
-            return ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+            cg = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+            cg.CGDisplayMirrorsDisplay.argtypes = [c_uint32]
+            cg.CGDisplayMirrorsDisplay.restype = c_uint32
+            return cg
         except Exception as e:
             logger.error(f"Failed to load CoreGraphics: {e}")
             return None
@@ -73,6 +76,7 @@ class DisplayDetector:
         for i in range(count.value):
             did = display_ids[i]
             is_active = bool(self._cg.CGDisplayIsActive(did))
+            mirror_source_id = int(self._cg.CGDisplayMirrorsDisplay(did)) or None
             is_main = bool(self._cg.CGDisplayIsMain(did))
             is_builtin = bool(self._cg.CGDisplayIsBuiltin(did))
             w = int(self._cg.CGDisplayPixelsWide(did))
@@ -81,10 +85,10 @@ class DisplayDetector:
             vendor = int(self._cg.CGDisplayVendorNumber(did))
             model = int(self._cg.CGDisplayModelNumber(did))
 
-            # Filter out ghost / inactive / placeholder 0x0 or 1x1 displays
-            # Apple Silicon creates dummy Display 1 (e.g. 0x0, 1x1, inactive) when booting headless
-            if not is_active or w <= 1 or h <= 1:
-                logger.debug(f"Ignoring inactive or placeholder display: did={did}, active={is_active}, {w}x{h}")
+            # Inactive physical outputs can still be online during layout restoration.
+            # Keep their identity for recovery; tiny headless placeholders are not usable.
+            if w <= 1 or h <= 1:
+                logger.debug(f"Ignoring placeholder display: did={did}, active={is_active}, {w}x{h}")
                 continue
 
             # If vendor is 0 and model is 0 without a matching BetterDisplay item, it's a headless placeholder
@@ -125,6 +129,10 @@ class DisplayDetector:
                 elif vendor != 0:
                     name = f"Monitor 0x{vendor:x} ({w}x{h})"
 
+            # An inactive Sidecar/virtual output without a mirror source is not ready.
+            if not is_active and mirror_source_id is None and (is_sidecar or is_virtual):
+                continue
+
             displays.append(
                 DisplayInfo(
                     display_id=did,
@@ -136,6 +144,8 @@ class DisplayDetector:
                     is_sidecar=is_sidecar,
                     width=w,
                     height=h,
+                    is_active=is_active,
+                    mirror_source_id=mirror_source_id,
                 )
             )
 

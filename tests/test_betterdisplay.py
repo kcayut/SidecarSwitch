@@ -7,6 +7,25 @@ from core.betterdisplay import BetterDisplayCLI
 
 
 class TestBetterDisplayCLI(unittest.TestCase):
+    def test_disconnect_virtual_display_uses_the_exact_configured_name(self):
+        with patch.object(BetterDisplayCLI, "_resolve_cli_path", return_value="/mock/betterdisplaycli"), \
+             patch.object(BetterDisplayCLI, "is_available", return_value=True), \
+             patch.object(BetterDisplayCLI, "run_cmd", return_value=(0, "", "")) as run:
+            self.assertTrue(BetterDisplayCLI(probe=False).disconnect_virtual_display("SidecarSwitchVirtual"))
+            run.assert_called_once_with(["set", "-name=SidecarSwitchVirtual", "-connected=off"], timeout=8.0)
+
+    def test_stop_mirroring_targets_the_display_and_reports_failure(self):
+        with patch.object(BetterDisplayCLI, "_resolve_cli_path", return_value="/mock/betterdisplaycli"), \
+             patch.object(BetterDisplayCLI, "is_available", return_value=True), \
+             patch.object(BetterDisplayCLI, "run_cmd", return_value=(0, "", "")) as run:
+            cli = BetterDisplayCLI(probe=False)
+            uuid = "11111111-2222-3333-4444-555555555555"
+            self.assertTrue(cli.stop_mirroring(uuid))
+            run.assert_called_once_with(["set", f"-uuid={uuid}", "-mirror=off"], timeout=8.0)
+            run.return_value = (1, "", "rejected")
+            self.assertFalse(cli.stop_mirroring("Monitor"))
+            self.assertEqual(run.call_args.args[0], ["set", "-name=Monitor", "-mirror=off"])
+
     def test_resilience_when_probe_times_out(self) -> None:
         """Verify that when the CLI binary exists, is_available remains True even if probe times out."""
         with patch("os.path.isfile", return_value=True), \

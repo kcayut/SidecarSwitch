@@ -34,9 +34,9 @@ SidecarSwitch 讓你用 **iPad 當 Mac 的主螢幕或副螢幕**，主要為 Ma
 
 開發版實機示範，已完成首次設定；不同版本與硬體仍需個別驗證。開機等待段加速 8 倍，最後畫面多停 1 秒。[觀看清晰版 MP4](docs/videos/headless-boot-demo.mp4)。
 
-**[下載 macOS 版（DMG）](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.3/SidecarSwitch-0.1.0-dev.3-macos-arm64.dmg)**
+**[下載 macOS 版（DMG）](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.5/SidecarSwitch-0.1.0-dev.5-macos-arm64.dmg)**
 
-v0.1.0-dev.3 · Apple Silicon · macOS 14+ · [發行說明](https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.3)
+v0.1.0-dev.5 · Apple Silicon · macOS 14+ · [發行說明](https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.5)
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-0.1.0-blue.svg" alt="Version: 0.1.0">
@@ -57,7 +57,7 @@ v0.1.0-dev.3 · Apple Silicon · macOS 14+ · [發行說明](https://github.com/
 
 多台 Mac 搭配使用時，各台 Mac 需先完成 SidecarSwitch 配對與全域快速鍵設定。
 
-v0.1.0-dev.3 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+。建議使用上方 DMG 下載；也可依[原始碼安裝說明](docs/INSTALLATION.md#source-installation)自行建置。
+v0.1.0-dev.5 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+。建議使用上方 DMG 下載；也可依[原始碼安裝說明](docs/INSTALLATION.md#source-installation)自行建置。
 
 ## 跟著畫面開始用
 
@@ -65,7 +65,7 @@ v0.1.0-dev.3 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+�
 
 ### 1. 安裝，打開 App
 
-下載 [v0.1.0-dev.3 DMG](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.3/SidecarSwitch-0.1.0-dev.3-macos-arm64.dmg)，打開後把 **SidecarSwitch.app 拖進 Applications**，再開啟 App。已內建 Python，不必另裝 Homebrew 或編譯工具。
+下載 [v0.1.0-dev.5 DMG](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.5/SidecarSwitch-0.1.0-dev.5-macos-arm64.dmg)，打開後把 **SidecarSwitch.app 拖進 Applications**，再開啟 App。已內建 Python，不必另裝 Homebrew 或編譯工具。
 
 開啟後就會看到設定視窗。關掉視窗，選單列仍會保留；要再開設定，點選單列的 **「設定與配對」**，或再雙擊 App。
 
@@ -94,6 +94,8 @@ v0.1.0-dev.3 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+�
 
 按下後等畫面出現，再到 **「連線螢幕狀態」**確認主／副螢幕。**「已偵測到 Sidecar」只代表找到裝置，還不等於已經顯示桌面。**
 
+中斷 iPad 前會確認仍有可用備援；無法確認就保留 iPad 連線。若原本有實體螢幕，斷線後卻完全偵測不到且恢復失敗，會只嘗試連回同一台 iPad 一次，保留錯誤並停止自動續試。
+
 若螢幕被誤判，可在這一頁的螢幕卡片勾選或取消 **「排除實體螢幕判斷」**；設定只影響它是否計入「有實體螢幕」，不會停止控制或關閉螢幕。`Generic`／`Generic Display` 預設排除，真實螢幕可取消勾選；也可按「恢復自動判斷」。**排除所有實體螢幕後，自動模式會視為沒有實體螢幕，並可能嘗試連線 iPad。** [詳細說明](docs/TROUBLESHOOTING.md#generic-display)
 
 ### 4. 決定要自己控制，還是自動連線
@@ -104,7 +106,7 @@ v0.1.0-dev.3 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+�
 
 | 模式 | 怎麼運作 |
 | --- | --- |
-| **僅手動模式**（新安裝預設） | 平時由你按按鈕或快速鍵連線，斷線後不自行重連。 |
+| **僅手動模式**（新安裝預設） | 平時由你按按鈕或快速鍵操作；插拔螢幕不會自動切換主螢幕。 |
 | **自動模式** | 有實體螢幕就以它為主；沒有時嘗試讓 iPad 接手。已連上的 iPad 可保留為副螢幕。 |
 | **偏好 iPad 模式** | 即使有實體螢幕，也優先嘗試讓 iPad 當主螢幕。 |
 
@@ -125,7 +127,9 @@ v0.1.0-dev.3 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+�
 
 [![虛擬備援螢幕：選擇 BetterDisplay 虛擬螢幕並指定為備援](docs/images/quick-start/zh-Hant-virtual.png)](docs/images/quick-start/zh-Hant-virtual.png)
 
-它能在 iPad 尚未接手時保留桌面，iPad 接手後也會保留。需要遠端救援的話，請事先自行設定 Screen Sharing／VNC 或 SSH；SidecarSwitch 不會替你開啟遠端存取。
+沒有實體螢幕時，虛擬備援會保留桌面，iPad 接手後也會保留。交接給實體螢幕時，先確認它已啟用且為主螢幕，再停用所設定的虛擬備援；此時若要求中斷 iPad，確認備援已停用後才切斷 Sidecar。僅手動模式不會因插入螢幕而自行交接。
+
+需要遠端救援的話，請事先自行設定 Screen Sharing／VNC 或 SSH；SidecarSwitch 不會替你開啟遠端存取。
 
 ## 卡住時，先看這裡
 

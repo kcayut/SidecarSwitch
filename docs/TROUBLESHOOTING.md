@@ -29,6 +29,7 @@ SIDECARSWITCH_CLI="/Applications/SidecarSwitch.app/Contents/Resources/sidecarswi
 - [6. 登入自啟動 LaunchAgent 問題 (`#autostart`)](#autostart)
 - [7. 如何收集除錯日誌回報問題 (`#logs`)](#logs)
 - [8. 預檢、私人路徑或啟動握手失敗 (`#safe-startup`)](#safe-startup)
+- [9. 更換實體螢幕與安全中斷 iPad (`#physical-handoff`)](#physical-handoff)
 
 ---
 
@@ -178,3 +179,24 @@ cat ~/Library/Logs/SidecarSwitch/launchd.stderr.log
 - 發行版更新失敗：即使新版 CLI 無法執行，安裝器仍會先確認新版程式與背景服務已停止，再還原舊版。若無法確認停止，會保留目前 App 與備份並回報 `Rollback incomplete`；請保留它們與錯誤紀錄，不要反覆覆蓋安裝。
 
 IPC 日誌僅記錄命令名稱；歷史日誌、診斷狀態與實際錯誤仍可能包含裝置資訊。分享前遮蔽序號、UUID、帳號及個人路徑。
+
+<a id="physical-handoff"></a>
+## 9. 更換實體螢幕與安全中斷 iPad
+
+### 新螢幕沒有自動接手，或出現鏡像選項
+
+**「僅手動模式」不會只因插入實體螢幕就自動切換。** 想讓實體螢幕接上後自動接手，請選「自動模式」。macOS 仍可能詢問鏡像或延伸桌面的用途；SidecarSwitch 不保證消除系統的螢幕設定提示。
+
+「連線螢幕狀態」可能顯示轉接器名稱，例如 `CH7218`，而非螢幕品牌。請依實際連線與卡片狀態確認，名稱不同不代表未偵測到實體螢幕。
+
+### 從 SidecarSwitch 中斷 iPad 時如何保護畫面
+
+有實體螢幕時，交接依序進行：
+
+1. 確認實體螢幕已啟用並接手主螢幕，必要時解除與虛擬螢幕或 iPad 的鏡像關係。
+2. 關閉 SidecarSwitch 設定的虛擬備援螢幕。
+3. 中斷 Sidecar，並再次確認實體螢幕可用。
+
+沒有實體螢幕時，仍保留虛擬備援供無頭使用。中斷前無法確認備援可用，就保留 iPad 連線。
+
+若中斷後原實體螢幕完全消失，且恢復失敗，程式最多嘗試連回**同一台 iPad 一次**。成功恢復連線仍會顯示警告，因為這次中斷沒有安全完成；後續自動切換會暫停，不會反覆斷線、重連。確認畫面正常後，可再次明確選擇「中斷 iPad」或其他連線操作重試；僅重新整理不會解除這個保護。若畫面尚未恢復，請手動連回 iPad，並保留診斷與日誌。

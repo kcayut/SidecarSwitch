@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0-dev.5] - 2026-09-27
+
+Development prerelease fixing physical-display handoff and iPad disconnection.
+
+### Fixed
+- Verify the physical display is active and main, then disconnect the configured virtual fallback before disconnecting iPad. Keep the virtual fallback when no physical display is available, and preserve the selected main display when several physical monitors are connected.
+- Recognize both directions of mirroring and retain identifiable inactive physical displays during layout restoration. Use the original display identity when attempting recovery.
+- Keep iPad connected if the fallback cannot be verified. If the physical display disappears after disconnection and recovery fails, attempt to reconnect the same iPad once, retain the error, and pause further automatic switching.
+- Preserve cancellation when changing modes and report unsuccessful display recovery consistently in diagnostics.
+
+### Documentation
+- Clarify virtual-fallback lifetime, manual-mode behavior, display names reported by adapters, and safe disconnection in Traditional Chinese, English, and Japanese.
+
+### Validation
+- 295 automated tests passed, together with the installed app's handoff check. The user confirmed the fix on a Mac mini running macOS 26.6.2 with a Sony M9 connected through a USB-C-to-HDMI adapter.
+- This confirms the reported handoff scenario only; other hardware, cold boot, sleep/wake, and the full supported-macOS matrix remain unverified for this release.
+
 ## [0.1.0-dev.3] - 2026-09-23
 
 Development prerelease for Apple Silicon and macOS 14+, with a directly downloadable SidecarSwitch DMG and three-language installation guidance.
@@ -95,6 +112,7 @@ Historical internal development record retained from the original changelog; thi
   - Restructured documentation, troubleshooting guide, and installation guides.
   - GitHub issue forms and PR templates.
 
-[Unreleased]: https://github.com/kcayut/SidecarSwitch/compare/v0.1.0-dev.3...main
+[Unreleased]: https://github.com/kcayut/SidecarSwitch/compare/v0.1.0-dev.5...main
+[0.1.0-dev.5]: https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.5
 [0.1.0-dev.3]: https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.3
 [0.1.0-dev.1]: https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.1

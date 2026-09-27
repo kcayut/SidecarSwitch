@@ -34,9 +34,9 @@ An animation illustrating the features; click to play it on the website. Both Ma
 
 Development-build demo filmed after initial setup. Other builds and hardware configurations require separate verification. The boot wait is sped up 8×, and the final frame is held for one extra second. [Watch the higher-quality MP4](docs/videos/headless-boot-demo.mp4).
 
-**[Download for macOS (DMG)](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.3/SidecarSwitch-0.1.0-dev.3-macos-arm64.dmg)**
+**[Download for macOS (DMG)](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.5/SidecarSwitch-0.1.0-dev.5-macos-arm64.dmg)**
 
-v0.1.0-dev.3 · Apple Silicon · macOS 14+ · [Release notes](https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.3)
+v0.1.0-dev.5 · Apple Silicon · macOS 14+ · [Release notes](https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.5)
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-0.1.0-blue.svg" alt="Version: 0.1.0">
@@ -57,7 +57,7 @@ v0.1.0-dev.3 · Apple Silicon · macOS 14+ · [Release notes](https://github.com
 
 For use with multiple Macs, complete SidecarSwitch pairing and global keyboard shortcut setup on each Mac first.
 
-The v0.1.0-dev.3 installer is available for Apple Silicon and macOS 14+. Use the DMG download above, or follow the [source installation instructions](docs/INSTALLATION.en.md#source-installation) to build it yourself.
+The v0.1.0-dev.5 installer is available for Apple Silicon and macOS 14+. Use the DMG download above, or follow the [source installation instructions](docs/INSTALLATION.en.md#source-installation) to build it yourself.
 
 ## Follow the screenshots
 
@@ -65,7 +65,7 @@ These screenshots demonstrate the native interface using **the project's sample 
 
 ### 1. Install and open the app
 
-Download the [v0.1.0-dev.3 DMG](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.3/SidecarSwitch-0.1.0-dev.3-macos-arm64.dmg), open it, and drag **SidecarSwitch.app into Applications**. Then open the app. Python is included; no Homebrew or compiler tools are needed.
+Download the [v0.1.0-dev.5 DMG](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.5/SidecarSwitch-0.1.0-dev.5-macos-arm64.dmg), open it, and drag **SidecarSwitch.app into Applications**. Then open the app. Python is included; no Homebrew or compiler tools are needed.
 
 The settings window opens with the app. Closing the window keeps the menu bar icon available. Choose **Settings & pairing** from that menu, or double-click the app, to open it again.
 
@@ -94,6 +94,8 @@ Open **Paired iPads**. To change the primary managed iPad, expand that device's 
 
 Wait for the desktop to appear, then check the roles in **Connected displays**. **“Sidecar detected” means the device was found, not that it is already showing your desktop.**
 
+Before disconnecting the iPad, SidecarSwitch verifies that a usable fallback remains; otherwise it keeps the iPad connected. If physical monitors were present but all disappear after disconnection and recovery fails, it tries reconnecting the same iPad once, keeps the error visible, and stops automatic retries.
+
 If a display is misclassified, check or uncheck **“Exclude from physical display detection”** on its card. This only changes whether it counts as a physical monitor; it does not stop controlling or turn off the display. `Generic` / `Generic Display` are excluded by default; uncheck this for a real monitor, or choose “Restore automatic detection” to return to the default. **Excluding every physical monitor makes Automatic mode treat the Mac as having none, so it may try to connect the iPad.** [More details](docs/TROUBLESHOOTING.en.md#generic-display)
 
 ### 4. Pick manual or automatic control
@@ -104,7 +106,7 @@ Open **Preferences**. Start with the default **Manual only** mode; switch modes 
 
 | Mode | What it does |
 | --- | --- |
-| **Manual only** (new-install default) | Connect when you use a button or shortcut. Does not reconnect on its own after disconnection. |
+| **Manual only** (new-install default) | Normally acts on your buttons or shortcuts; plugging or unplugging a monitor does not automatically change the main display. |
 | **Automatic mode** | Prefers a physical monitor when present; otherwise tries to let the iPad take over. An already-connected iPad can remain a secondary display. |
 | **Prefer iPad** | Tries to make the iPad the main display even with a physical monitor connected. |
 
@@ -125,7 +127,9 @@ Refreshing the list does not retry creation. If you installed BetterDisplay afte
 
 [![Virtual fallback: select a BetterDisplay virtual display and use it as fallback](docs/images/quick-start/en-virtual.png)](docs/images/quick-start/en-virtual.png)
 
-This keeps a desktop available while the iPad is not ready, and remains available after takeover. Set up Screen Sharing/VNC or SSH beforehand if you need remote recovery; SidecarSwitch does not enable remote access for you.
+Without a physical monitor, the virtual fallback keeps a desktop available and stays connected after iPad takeover. A handoff to a physical monitor first verifies that it is active and main, then disconnects the configured virtual fallback. During this physical handoff, a requested iPad disconnection happens only after the virtual fallback is confirmed off. Manual only mode does not initiate this handoff just because a monitor is plugged in.
+
+Set up Screen Sharing/VNC or SSH beforehand if you need remote recovery; SidecarSwitch does not enable remote access for you.
 
 ## If something gets stuck
 

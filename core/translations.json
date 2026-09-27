@@ -1504,6 +1504,16 @@
     "zh-Hant": "硬體查詢未完成，保留目前畫面與手動設定。",
     "ja": "ハードウェア情報を確認できません。現在の画面と手動設定を維持します。"
   },
+  "Could not restore the fallback display after disconnecting iPad. Reconnect iPad to recover.": {
+    "en": "Could not restore the fallback display after disconnecting iPad. Reconnect iPad to recover.",
+    "zh-Hant": "中斷 iPad 後無法恢復備援螢幕。請重新連接 iPad 以恢復畫面。",
+    "ja": "iPad の切断後、予備ディスプレイを復元できませんでした。画面を復元するには iPad を再接続してください。"
+  },
+  "Could not safely disconnect iPad; iPad was reconnected to restore the display.": {
+    "en": "Could not safely disconnect iPad; iPad was reconnected to restore the display.",
+    "zh-Hant": "無法安全中斷 iPad，已重新連接 iPad 以恢復畫面。",
+    "ja": "iPad を安全に切断できなかったため、画面を復元するために iPad を再接続しました。"
+  },
   "Could not verify fallback display; iPad was not disconnected.": {
     "en": "Could not verify fallback display; iPad was not disconnected.",
     "zh-Hant": "無法確認備援螢幕可用，已保留 iPad 連線。",
