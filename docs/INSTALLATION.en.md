@@ -34,7 +34,7 @@ The installer selects the newest published release including prereleases, checks
 
 - `--bundled`: use bundled CPython; `--yes` without a Python option also selects this.
 - `--python /absolute/path/python3`: use Apple Silicon CPython 3.10+ after version, architecture, and required-module validation.
-- `--tag v0.1.0-dev.5`: select an existing release explicitly.
+- `--tag v0.5`: select an existing release explicitly.
 
 On a fresh installation, open the app to start its service. Updates unregister the native login service before replacing the app, then restore previously enabled login startup and running state. Items blocked by macOS or awaiting approval are not automatically requested again. Settings and pairings remain; script updates still ask for Python again. Failed installation attempts to restore the app, preferences, and service. Before changing installation locations, use the CLI below to remove the original installation while keeping settings.
 
@@ -63,13 +63,13 @@ Optional CLI cleanup, for example to remove data too or change installation loca
 These commands assume the GitHub remote is named `github`. A direct GitHub clone usually names it `origin`; check `git remote -v` and substitute the correct name. Pushing to Gitea does not trigger GitHub Actions.
 
 ```bash
-git tag v0.1.0-dev.5
-git push github v0.1.0-dev.5
+git tag v0.5
+git push github v0.5
 ```
 
-Commit the intended changes first. Tags support `vX.Y.Z` and `vX.Y.Z-dev.N` / `alpha.N` / `beta.N` / `rc.N`. **Push the tag to GitHub; a local tag alone does not trigger a build.** The ARM workflow runs software checks, compilation, packaging, and relocation tests, then automatically publishes a prerelease after all assets are uploaded. No Apple certificate or manual approval is needed. Published releases are not overwritten; use a new tag for fixes. Failed drafts can be rerun. Physical-device acceptance remains unknown.
+Commit the intended changes first. Tags support `vX.Y` (such as `v0.5`) or `vX.Y.Z`, optionally followed by `-dev.N` / `alpha.N` / `beta.N` / `rc.N`. **Push the tag to GitHub; a local tag alone does not trigger a build.** The ARM workflow runs software checks, compilation, packaging, and relocation tests, then automatically publishes after all assets are uploaded; versions without a prerelease suffix become Latest, while suffixed versions remain prereleases. No Apple certificate or manual approval is needed. Published releases are not overwritten; use a new tag for fixes. Failed drafts can be rerun. Physical-device acceptance remains unknown.
 
-For the same local artifacts, use Python 3.12+ and Apple build tools. In a build virtual environment, run `python3 -m pip install -r scripts/dmg-requirements.txt`, then `python3 scripts/build_release.py --tag v0.1.0-dev.5`. Output is `dist/<tag>/`. The DMG layout packages are build tools only and are not bundled in the app runtime; `--no-dmg` skips the DMG and this dependency. CPython’s upstream URL and SHA-256 are pinned in `scripts/python-runtime.json`; its licenses remain included. The full tag and build commit are recorded in the artifacts.
+For the same local artifacts, use Python 3.12+ and Apple build tools. In a build virtual environment, run `python3 -m pip install -r scripts/dmg-requirements.txt`, then `python3 scripts/build_release.py --tag v0.5`. Output is `dist/<tag>/`. The DMG layout packages are build tools only and are not bundled in the app runtime; `--no-dmg` skips the DMG and this dependency. CPython’s upstream URL and SHA-256 are pinned in `scripts/python-runtime.json`; its licenses remain included. The full tag and build commit are recorded in the artifacts.
 
 <a id="source-installation"></a>
 ## Source installation (development)
@@ -165,7 +165,7 @@ If writing there fails, SidecarSwitch uses `/tmp/SidecarSwitch/config.json`. The
 
 ## Update and restore
 
-Back up the prior source, save your changes, and close settings. After updating the source, repeat preflight → installation → status; the native binary is rebuilt too. The GUI About page displays `v0.1.0`, sharing `core.__version__` with the CLI and app. It also includes a GitHub link and inactive donation placeholders.
+Back up the prior source, save your changes, and close settings. After updating the source, repeat preflight → installation → status; the native binary is rebuilt too. The GUI About page displays `v0.5`, sharing `core.__version__` with the CLI and app. It also includes a GitHub link and inactive donation placeholders.
 
 The installer preserves configuration and moves the previous app to Trash. It does not download updates, create Git tags, or publish releases. Restoring only the app from Trash does not restore the source it references.
 

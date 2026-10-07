@@ -1,4 +1,4 @@
-name: Apple Silicon development release
+name: Apple Silicon release
 
 "on":
   push:
@@ -6,7 +6,7 @@ name: Apple Silicon development release
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing tag to build and publish as a prerelease
+        description: Existing tag to build and publish
         required: true
         type: string
 
@@ -51,11 +51,14 @@ jobs:
         run: |
           python -m pip install -r scripts/dmg-requirements.txt
           python scripts/build_release.py --tag "$RELEASE_TAG"
-      - name: Publish complete development prerelease
+      - name: Publish complete release
         run: |
           directory="dist/$RELEASE_TAG"
+          prerelease=false
+          latest=true
+          case "$RELEASE_TAG" in *-*) prerelease=true; latest=false ;; esac
           cat > "$RUNNER_TEMP/sidecarswitch-release-notes.md" <<'NOTES'
-          Apple Silicon · macOS 14+ · Development preview
+          Apple Silicon · macOS 14+ · Early preview
 
           Download the DMG and drag SidecarSwitch.app into Applications. Swift and CPython are included; no local compiler or Python installation is required. BetterDisplay must be installed and running; its separate CLI is optional.
 
@@ -67,10 +70,11 @@ jobs:
 
           日本語：DMG を開き、SidecarSwitch.app をアプリケーションにドラッグして起動してください。Swift と CPython を同梱しています。BetterDisplay アプリの導入と起動は必要で、独立した CLI は任意です。ad-hoc 署名のみで Apple 公証はありません。開発元の確認警告が出る場合は取得元と README を確認してください。実機での Sidecar、USB 抜き差し、コールドブートは未検証です。
           NOTES
+          printf '\n[Changelog](https://github.com/kcayut/SidecarSwitch/blob/%s/CHANGELOG.md)\n' "$RELEASE_TAG" >> "$RUNNER_TEMP/sidecarswitch-release-notes.md"
           if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' > "$RUNNER_TEMP/sidecarswitch-draft" 2>/dev/null; then
             test "$(cat "$RUNNER_TEMP/sidecarswitch-draft")" = true || { echo 'Published releases are immutable; push a new tag.'; exit 1; }
           else
-            gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --title "SidecarSwitch ${RELEASE_TAG#v} (Development)" --notes-file "$RUNNER_TEMP/sidecarswitch-release-notes.md"
+            gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease="$prerelease" --title "SidecarSwitch $RELEASE_TAG" --notes-file "$RUNNER_TEMP/sidecarswitch-release-notes.md"
           fi
           gh release upload "$RELEASE_TAG" "$directory"/*.dmg "$directory"/*.zip "$directory/SHA256SUMS" "$directory/build-info.json" --clobber
-          gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease="$prerelease" --latest="$latest"

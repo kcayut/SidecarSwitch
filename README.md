@@ -34,12 +34,12 @@ SidecarSwitch 讓你用 **iPad 當 Mac 的主螢幕或副螢幕**，主要為 Ma
 
 開發版實機示範，已完成首次設定；不同版本與硬體仍需個別驗證。開機等待段加速 8 倍，最後畫面多停 1 秒。[觀看清晰版 MP4](docs/videos/headless-boot-demo.mp4)。
 
-**[下載 macOS 版（DMG）](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.5/SidecarSwitch-0.1.0-dev.5-macos-arm64.dmg)**
+**[下載 macOS 版（DMG）](https://github.com/kcayut/SidecarSwitch/releases/download/v0.5/SidecarSwitch-0.5-macos-arm64.dmg)**
 
-v0.1.0-dev.5 · Apple Silicon · macOS 14+ · [發行說明](https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.5)
+v0.5 · Apple Silicon · macOS 14+ · [發行說明](https://github.com/kcayut/SidecarSwitch/releases/tag/v0.5)
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.0-blue.svg" alt="Version: 0.1.0">
+  <img src="https://img.shields.io/badge/version-0.5-blue.svg" alt="Version: 0.5">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg" alt="License: PolyForm Noncommercial 1.0.0"></a>
   <img src="https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey.svg" alt="Platform: macOS 14+">
   <img src="https://img.shields.io/badge/status-early%20preview-orange.svg" alt="Status: Early Preview">
@@ -57,7 +57,7 @@ v0.1.0-dev.5 · Apple Silicon · macOS 14+ · [發行說明](https://github.com/
 
 多台 Mac 搭配使用時，各台 Mac 需先完成 SidecarSwitch 配對與全域快速鍵設定。
 
-v0.1.0-dev.5 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+。建議使用上方 DMG 下載；也可依[原始碼安裝說明](docs/INSTALLATION.md#source-installation)自行建置。
+v0.5 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+。建議使用上方 DMG 下載；也可依[原始碼安裝說明](docs/INSTALLATION.md#source-installation)自行建置。
 
 ## 跟著畫面開始用
 
@@ -65,7 +65,7 @@ v0.1.0-dev.5 預編譯安裝包已發布，適用於 Apple Silicon、macOS 14+�
 
 ### 1. 安裝，打開 App
 
-下載 [v0.1.0-dev.5 DMG](https://github.com/kcayut/SidecarSwitch/releases/download/v0.1.0-dev.5/SidecarSwitch-0.1.0-dev.5-macos-arm64.dmg)，打開後把 **SidecarSwitch.app 拖進 Applications**，再開啟 App。已內建 Python，不必另裝 Homebrew 或編譯工具。
+下載 [v0.5 DMG](https://github.com/kcayut/SidecarSwitch/releases/download/v0.5/SidecarSwitch-0.5-macos-arm64.dmg)，打開後把 **SidecarSwitch.app 拖進 Applications**，再開啟 App。已內建 Python，不必另裝 Homebrew 或編譯工具。
 
 開啟後就會看到設定視窗。關掉視窗，選單列仍會保留；要再開設定，點選單列的 **「設定與配對」**，或再雙擊 App。
 

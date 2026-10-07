@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a relocatable Apple Silicon development release. Never install or publish."""
+"""Build a relocatable Apple Silicon release. Never install or publish."""
 import argparse
 import hashlib
 import json
@@ -17,8 +17,8 @@ from build_dmg import build_dmg
 
 
 def release_version(tag):
-    if not re.fullmatch(r'v\d+\.\d+\.\d+(?:-(?:dev|alpha|beta|rc)\.\d+)?', tag):
-        raise ValueError('Expected vX.Y.Z or vX.Y.Z-dev.N / alpha.N / beta.N / rc.N')
+    if not re.fullmatch(r'v\d+\.\d+(?:\.\d+)?(?:-(?:dev|alpha|beta|rc)\.\d+)?', tag):
+        raise ValueError('Expected vX.Y or vX.Y.Z, optionally followed by -dev.N / alpha.N / beta.N / rc.N')
     return tag[1:]
 
 

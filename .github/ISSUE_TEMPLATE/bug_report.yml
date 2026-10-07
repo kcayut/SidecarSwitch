@@ -36,7 +36,7 @@ body:
     attributes:
       label: 軟體版本
       description: 請提供 SidecarSwitch、Python 與 BetterDisplay 版本，以及原生 App 的建置方式
-      placeholder: "SidecarSwitch: 0.1.0, Python: 3.x, BetterDisplay: 3.x, App: scripts/install.sh"
+      placeholder: "SidecarSwitch: 0.5, Python: 3.x, BetterDisplay: 3.x, App: scripts/install.sh"
     validations:
       required: true
   - type: input

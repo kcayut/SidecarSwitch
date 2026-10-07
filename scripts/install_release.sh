@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fetch an official prebuilt development release; macOS tools handle download/mount.
+# Fetch an official prebuilt release; macOS tools handle download/mount.
 set -euo pipefail
 TAG=""
 PYTHON_BIN=""
@@ -20,7 +20,7 @@ while [[ $# -gt 0 ]]; do
         --bundled) [[ -z "$PYTHON_BIN" ]] || die 'Choose --bundled or --python'; RUNTIME=bundled; shift ;;
         --yes|-y) YES=1; shift ;;
         --help|-h)
-            echo 'Usage: bash install_release.sh [--tag vX.Y.Z-dev.N] [--bundled | --python /path/to/python3] [--target /path/SidecarSwitch.app] [--yes]'
+            echo 'Usage: bash install_release.sh [--tag v0.5] [--bundled | --python /path/to/python3] [--target /path/SidecarSwitch.app] [--yes]'
             echo 'Default: newest published SidecarSwitch DMG including prereleases. No compiler, Homebrew or system Python required.'
             exit 0 ;;
         *) die "Unknown option: $1" ;;
@@ -38,7 +38,7 @@ if [[ -z "$RUNTIME" && "$YES" == 0 ]]; then
         *) die 'Select 1 or 2.' ;;
     esac
 fi
-[[ -n "$TAG" ]] && [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-(dev|alpha|beta|rc)\.[0-9]+)?$ ]] || [[ -z "$TAG" ]] || die 'Invalid release tag.'
+[[ -n "$TAG" ]] && [[ "$TAG" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?(-(dev|alpha|beta|rc)\.[0-9]+)?$ ]] || [[ -z "$TAG" ]] || die 'Invalid release tag.'
 umask 077
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/sidecarswitch-release.XXXXXX")"
 MOUNT="$WORK_DIR/mounted"
@@ -51,7 +51,7 @@ if [[ -z "$TAG" ]]; then
     while plutil -extract "$INDEX.tag_name" raw -o - "$WORK_DIR/releases.json" > "$WORK_DIR/tag" 2>/dev/null; do
         DRAFT="$(plutil -extract "$INDEX.draft" raw -o - "$WORK_DIR/releases.json")"
         CANDIDATE="$(cat "$WORK_DIR/tag")"
-        if [[ "$DRAFT" == false && "$CANDIDATE" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-(dev|alpha|beta|rc)\.[0-9]+)?$ ]]; then
+        if [[ "$DRAFT" == false && "$CANDIDATE" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?(-(dev|alpha|beta|rc)\.[0-9]+)?$ ]]; then
             ASSET_INDEX=0
             while NAME="$(plutil -extract "$INDEX.assets.$ASSET_INDEX.name" raw -o - "$WORK_DIR/releases.json" 2>/dev/null)"; do
                 if [[ "$NAME" == "SidecarSwitch-${CANDIDATE#v}-macos-arm64.dmg" ]]; then TAG="$CANDIDATE"; break; fi

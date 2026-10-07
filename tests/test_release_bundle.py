@@ -54,8 +54,8 @@ shutil.copyfile(os.environ['FIXTURE'], sys.argv[sys.argv.index('--output') + 1])
                 {'tag_name': 'v0.1.0-dev.4', 'draft': False, 'assets': [{'name': 'unrelated.dmg'}]},
                 {'tag_name': 'v0.1.0-dev.3', 'draft': True,
                  'assets': [{'name': 'SidecarSwitch-0.1.0-dev.3-macos-arm64.dmg'}]},
-                {'tag_name': 'v0.1.0-dev.2', 'draft': False,
-                 'assets': [{'name': 'SHA256SUMS'}, {'name': 'SidecarSwitch-0.1.0-dev.2-macos-arm64.dmg'}]},
+                {'tag_name': 'v0.5', 'draft': False,
+                 'assets': [{'name': 'SHA256SUMS'}, {'name': 'SidecarSwitch-0.5-macos-arm64.dmg'}]},
             ]
             for available in (True, False):
                 fixture.write_text(json.dumps(releases if available else releases[:2]))
@@ -68,10 +68,23 @@ shutil.copyfile(os.environ['FIXTURE'], sys.argv[sys.argv.index('--output') + 1])
                 self.assertNotEqual(result.returncode, 0)
                 if available:
                     self.assertEqual(len(urls), 2)
-                    self.assertTrue(urls[-1].endswith('/v0.1.0-dev.2/SidecarSwitch-0.1.0-dev.2-macos-arm64.dmg'))
+                    self.assertTrue(urls[-1].endswith('/v0.5/SidecarSwitch-0.5-macos-arm64.dmg'))
                 else:
                     self.assertEqual(len(urls), 1)
                     self.assertIn('No published SidecarSwitch release found yet', result.stderr)
+            for tag in ('v0.5', 'v0.1.0-dev.2', 'v0.5/../bad'):
+                requests.unlink(missing_ok=True)
+                result = subprocess.run(['bash', str(ROOT / 'scripts/install_release.sh'), '--yes', '--bundled', '--tag', tag],
+                                        env=dict(os.environ, PATH=str(root) + ':' + os.environ['PATH'],
+                                                 FIXTURE=str(fixture), REQUESTS=str(requests)),
+                                        capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                if tag.endswith('/../bad'):
+                    self.assertFalse(requests.exists())
+                    self.assertIn('Invalid release tag', result.stderr)
+                else:
+                    self.assertEqual(requests.read_text().splitlines(), [
+                        f'https://github.com/kcayut/SidecarSwitch/releases/download/{tag}/SidecarSwitch-{tag[1:]}-macos-arm64.dmg'])
 
     @unittest.skipUnless(sys.platform == 'darwin', 'Icon decoding uses macOS tools')
     def test_app_icon_decodes_at_every_standard_and_retina_size(self):
@@ -289,8 +302,9 @@ shutil.copyfile(os.environ['FIXTURE'], sys.argv[sys.argv.index('--output') + 1])
                 self.assertEqual((home / '.Trash').exists(), not failure)
 
     def test_tag_validation_and_conflicting_runtime_options_fail_early(self):
-        self.assertEqual(build_release.release_version('v1.2.3-dev.4'), '1.2.3-dev.4')
-        for tag in ('main', 'v1', 'v1.2.3/../../bad', 'v1.2.3;echo bad'):
+        for tag in ('v0.5', 'v0.5.0', 'v1.2.3-dev.4', 'v0.5-beta.1'):
+            self.assertEqual(build_release.release_version(tag), tag[1:])
+        for tag in ('main', 'v1', 'v0.5.0.1', 'v0.5/../bad', 'v0.5;echo bad', 'v0.5\n', 'v1.2.3/../../bad', 'v1.2.3;echo bad'):
             with self.assertRaises(ValueError):
                 build_release.release_version(tag)
         for args in (['--bundled', '--python', '/bin/python3'], ['--python', '/bin/python3', '--bundled']):

@@ -3,9 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+with short public version labels such as `v0.5`. Historical development tags remain available.
 
 ## [Unreleased]
+
+## [0.5] - 2026-10-07
+
+### Changed
+- Use the short public version `v0.5` in the app, CLI, download filenames, and three-language documentation and website.
+- Accept two-part version tags in packaging and both automatic and explicit release installation, while retaining existing three-part and prerelease formats.
+- Publish versions without a prerelease suffix as the latest GitHub release; suffixed versions remain prereleases.
+- Preserve the display-control behavior from `v0.1.0-dev.5`.
+
+### Validation scope
+- This version-number change does not add physical-device acceptance evidence. Full hardware and supported-macOS coverage remain unverified.
+- Builds remain ad-hoc signed and are not Apple notarized.
 
 ## [0.1.0-dev.5] - 2026-09-27
 
@@ -112,7 +124,8 @@ Historical internal development record retained from the original changelog; thi
   - Restructured documentation, troubleshooting guide, and installation guides.
   - GitHub issue forms and PR templates.
 
-[Unreleased]: https://github.com/kcayut/SidecarSwitch/compare/v0.1.0-dev.5...main
+[Unreleased]: https://github.com/kcayut/SidecarSwitch/compare/v0.5...main
+[0.5]: https://github.com/kcayut/SidecarSwitch/releases/tag/v0.5
 [0.1.0-dev.5]: https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.5
 [0.1.0-dev.3]: https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.3
 [0.1.0-dev.1]: https://github.com/kcayut/SidecarSwitch/releases/tag/v0.1.0-dev.1
